@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>Rendered Works</title>
+  <meta name="description" content="Architectural visualization and animation portfolio." />
+  <meta name="theme-color" content="#eeeeec" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Discs" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-label="Project discs. Drag a disc to spin it, swipe to browse, tap to play."></canvas>
+
+  <header class="nav">
+    <button class="brand" id="brand" title="Tap to rename">Studio</button>
+    <span class="nav-link active">Films</span>
+    <button class="nav-link" id="index-toggle" aria-expanded="false">Index
+      <svg width="11" height="7" viewBox="0 0 11 7" aria-hidden="true"><path d="M1 1l4.5 4.5L10 1" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+    </button>
+  </header>
+
+  <button class="add-btn" id="add-btn" aria-label="Add a disc"><span>+</span> Add disc</button>
+
+  <aside class="info" id="info" aria-live="polite"></aside>
+  <section class="notes" id="notes"></section>
+
+  <div class="controls">
+    <button id="prev" aria-label="Previous project">&#8592;</button>
+    <span id="counter">01 / 01</span>
+    <button id="next" aria-label="Next project">&#8594;</button>
+  </div>
+  <p class="hint" id="hint">Drag a disc to spin &middot; Scroll to browse &middot; Click to play</p>
+  <p class="empty-hint">These are sample discs &mdash; tap <b>+ Add disc</b> to add your first video</p>
+
+  <!-- Index -->
+  <nav class="index" id="index" aria-hidden="true">
+    <div class="index-inner">
+      <ol id="index-list"></ol>
+      <p class="storage" id="storage"></p>
+    </div>
+  </nav>
+
+  <!-- Video player -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-inner">
+      <div class="modal-head">
+        <h2 id="modal-title"></h2>
+        <div class="modal-actions">
+          <button id="modal-edit" class="own-only">Edit</button>
+          <button id="modal-delete" class="own-only danger">Delete</button>
+          <button id="modal-close" aria-label="Close video">Close &times;</button>
+        </div>
+      </div>
+      <div class="player" id="player"></div>
+    </div>
+  </div>
+
+  <!-- Add / edit disc -->
+  <div class="sheet" id="editor" aria-hidden="true">
+    <form class="sheet-inner" id="editor-form" autocomplete="off">
+      <div class="sheet-head">
+        <h2 id="editor-heading">Add a disc</h2>
+        <button type="button" id="editor-cancel">Cancel</button>
+      </div>
+
+      <div class="pickers">
+        <label class="disc-preview" title="Choose cover art">
+          <input type="file" accept="image/*" id="in-cover" class="vh" />
+          <div class="disc-art" id="cover-preview"><span>Cover art</span></div>
+          <div class="disc-hole"></div>
+        </label>
+
+        <div class="picker-stack">
+          <label class="picker">
+            <input type="file" accept="video/*,.mp4,.mov,.m4v" id="in-video" class="vh" />
+            <span class="pk-k">Video</span>
+            <span class="pk-v" id="video-name">Choose from Files or Photos</span>
+          </label>
+          <label class="picker">
+            <span class="pk-k">Cover art</span>
+            <span class="pk-v" id="cover-name">Tap the disc to choose an image — or a frame from the video is used</span>
+          </label>
+          <button type="button" class="link-btn" id="use-frame" hidden>Use a frame from the video instead</button>
+        </div>
+      </div>
+
+      <div class="fields">
+        <label class="field wide"><span>Title</span><input id="f-title" required maxlength="60" placeholder="Project name" /></label>
+        <label class="field"><span>Location</span><input id="f-location" maxlength="60" placeholder="City, Country" /></label>
+        <label class="field"><span>Year</span><input id="f-year" inputmode="numeric" maxlength="4" /></label>
+        <label class="field"><span>Client</span><input id="f-client" maxlength="60" /></label>
+        <label class="field"><span>Made with</span><input id="f-tools" maxlength="100" placeholder="3ds Max, Corona, After Effects" /></label>
+      </div>
+
+      <label class="check"><input type="checkbox" id="f-showtitle" checked /> Print the title on the disc</label>
+
+      <div class="sheet-foot">
+        <span class="status" id="editor-status"></span>
+        <button type="submit" class="primary" id="editor-save">Add disc</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="loader" id="loader">Loading</div>
+
+  <script type="module" src="main.js"></script>
+  <script>
+    if ("serviceWorker" in navigator && location.protocol === "https:") {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+  </script>
+</body>
+</html>
